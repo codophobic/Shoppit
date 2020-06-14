@@ -1,6 +1,7 @@
 import React,{useState} from 'react';
 import { Typography, Button, Form, message, Input, Icon } from 'antd';
 import FileUpload from '../../utils/FileUpload';
+import Axios from 'axios';
 
 const { Title } = Typography;
 const { TextArea } = Input;
@@ -15,7 +16,7 @@ const Continents = [
     { key: 7, value: "Antarctica" }
 ]
 
-function UploadProductPage() {
+function UploadProductPage(props) {
 
 
     const [TitleValue, setTitleValue] = useState("")
@@ -45,7 +46,34 @@ function UploadProductPage() {
     const updateImages = (newImages) => {
         setImages(newImages)
     }
+   
+    const onSubmit=(e)=>{
+        e.preventDefault();
 
+        if(!TitleValue||!DescriptionValue||!PriceValue||!ContinentValue||!Images)
+        {
+            return alert('Fill all fields');
+        }
+        const variables={
+            writer:props.user.userData._id,
+            title:TitleValue,
+            description:DescriptionValue,
+            price:PriceValue,
+            images:Images,
+            continents:ContinentValue,
+        }
+        Axios.post('/api/product/uploadProduct',variables)
+              .then(response=>{
+                  if(response.data.success)
+                  {
+                 alert('product successfully uploaded');
+                 props.history.push('/');
+                  }
+                  else{
+                      alert('product upload failed');
+                  }
+              })
+    }
 
 
 
@@ -56,7 +84,7 @@ function UploadProductPage() {
             </div>
 
 
-            <Form  >
+            <Form onSubmit={onSubmit} >
 
                 {/* DropZone */}
                 <FileUpload refreshFunction={updateImages} />
@@ -93,6 +121,7 @@ function UploadProductPage() {
                 <br />
 
                 <Button
+                onClick={onSubmit}
                 >
                     Submit
                 </Button>
